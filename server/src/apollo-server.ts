@@ -17,7 +17,12 @@ const SCHEMA = loadSchemaSync(GRAPHQL_SCHEMA_PATH, {
 export async function createApolloServer(db: Db, httpServer: Server, app: express.Application): Promise<ApolloServer<ExpressContext>> {
     const server = new ApolloServer({
         schema: addResolversToSchema({ schema: SCHEMA, resolvers }),
-        context: (): TwitterResolverContext => ({ db }),
+        context: (): TwitterResolverContext => ({
+            db,
+            dbTweetCache: {},
+            dbTweetToFavoriteCountMap: {},
+            dbUserCache: {},
+        }),
         plugins: [
             ApolloServerPluginDrainHttpServer({ httpServer }),
         ],
