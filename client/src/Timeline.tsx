@@ -1,13 +1,8 @@
+import gql from 'graphql-tag';
 import * as React from 'react';
 import ComposePanel from './ComposePanel';
 import Tweet from './Tweet';
-import { gql } from "@apollo/client"
-import { useGetTimelineTweetsQuery } from "./generated/graphql"
-
-export interface TimelineProps {
-  currentUserId: string;
-  currentUserFavorites: string[];
-}
+import { useGetTimelineTweetsQuery } from './generated/graphql';
 
 export const GET_TIMELINE_TWEETS = gql`
   query GetTimelineTweets {
@@ -20,6 +15,11 @@ export const GET_TIMELINE_TWEETS = gql`
         commentCount
       }
       createdAt
+      favorites {
+        user {
+          id
+        }
+      }
       author {
         name
         handle
@@ -27,18 +27,24 @@ export const GET_TIMELINE_TWEETS = gql`
       }
     }
   }
-`
+`;
+
+export interface TimelineProps {
+  currentUserId: string;
+  currentUserFavorites: string[];
+}
 
 const Timeline: React.FC<TimelineProps> = ({
   currentUserFavorites,
   currentUserId,
 }) => {
-  const { loading, error, data } = useGetTimelineTweetsQuery()
-  if (loading) return <p>Loading...</p>
-  if (error) return <p>Error: {error}</p>
-  if (!data) return <p>No data!</p>
-  const { tweets } = data
-  if (!tweets) return <p>No tweets!</p>
+  const { loading, error, data } = useGetTimelineTweetsQuery();
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!data) return <p>No data!</p>;
+  const { tweets } = data;
+  if (!tweets) return <p>No tweets!</p>;
+
   return (
     <div id="timeline">
       <ComposePanel currentUser={{ id: currentUserId }} />
@@ -48,11 +54,8 @@ const Timeline: React.FC<TimelineProps> = ({
         const isFavorited = currentUserFavorites.includes(t.id);
 
         const { stats, id } = t;
-        const {
-          commentCount = 0,
-          favoriteCount = 0,
-          retweetCount = 0,
-        } = stats || {};
+        const { commentCount = 0, favoriteCount = 0, retweetCount = 0 } =
+          stats || {};
         const tweet = {
           id,
           isFavorited,
