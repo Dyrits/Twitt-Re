@@ -1,6 +1,6 @@
-import * as low from 'lowdb';
-import * as FileSync from 'lowdb/adapters/FileSync';
-import { v4 as uuid } from 'uuid';
+import * as low from "lowdb";
+import * as FileSync from "lowdb/adapters/FileSync";
+import { v4 as uuid } from "uuid";
 
 export interface DbEntity {
   id: string;
@@ -29,7 +29,7 @@ export interface DbFavorite extends DbEntity {
 
 export interface DbHashtagTrend {
   id: string;
-  kind: 'hashtag';
+  kind: "hashtag";
   hashtag: string;
   tweetCount: number;
 }
@@ -42,7 +42,7 @@ export interface DbTopicTrendQuote {
 }
 export interface DbTopicTrend {
   id: string;
-  kind: 'topic';
+  kind: "topic";
   topic: string;
   tweetCount: number;
   quote?: DbTopicTrendQuote;
@@ -90,53 +90,53 @@ class Db {
   }
 
   getFirstUser(): DbUser {
-    const firstUser = this.db.get('users').first().value();
-    if (!firstUser) throw new Error('No users in database');
+    const firstUser = this.db.get("users").first().value();
+    if (!firstUser) throw new Error("No users in database");
     return firstUser;
   }
 
   getUserById(id: string) {
     return this.db
-      .get('users')
+      .get("users")
       .find((u) => u.id === id)
       .value();
   }
   getTweetById(id: string) {
     return this.db
-      .get('tweets')
+      .get("tweets")
       .find((t) => t.id === id)
       .value();
   }
   getUserTweets(userId: string) {
     return this.db
-      .get('tweets')
+      .get("tweets")
       .filter((t) => t.userId === userId)
       .value();
   }
   getUserFavorites(userId: string) {
     return this.db
-      .get('favorites')
+      .get("favorites")
       .filter((f) => f.userId === userId)
       .value();
   }
 
   getAllTweets(): DbTweet[] {
     return this.db
-      .get('tweets')
+      .get("tweets")
       .sortBy((t) => new Date(t.createdAt).valueOf())
       .reverse()
       .value();
   }
 
   getAllFavorites(): DbFavorite[] {
-    return this.db.get('favorites').value();
+    return this.db.get("favorites").value();
   }
 
   getAllTrends(): DbTrend[] {
-    const hashTrends = this.db.get('hashtagTrends').reverse().value();
-    const topicTrends = this.db.get('topicTrends').reverse().value();
+    const hashTrends = this.db.get("hashtagTrends").reverse().value();
+    const topicTrends = this.db.get("topicTrends").reverse().value();
     const topicTrendQuotes = this.db
-      .get('topicTrendQuotes')
+      .get("topicTrendQuotes")
       .reverse()
       .value()
       .reduce((acc, item) => {
@@ -155,12 +155,12 @@ class Db {
   }
 
   getAllSuggestions() {
-    return this.db.get('suggestions').value();
+    return this.db.get("suggestions").value();
   }
 
   getFavoritesForTweet(tweetId: string): DbFavorite[] {
     return this.db
-      .get('favorites')
+      .get("favorites")
       .filter((t) => t.tweetId === tweetId)
       .value();
   }
@@ -168,9 +168,9 @@ class Db {
     return this.getFavoritesForTweet(tweetId).length;
   }
   async createSuggestion(
-    trendProps: Pick<DbSuggestion, 'avatarUrl' | 'handle' | 'name' | 'reason'>
+    trendProps: Pick<DbSuggestion, "avatarUrl" | "handle" | "name" | "reason">
   ): Promise<DbSuggestion> {
-    const suggestions = this.db.get('suggestions');
+    const suggestions = this.db.get("suggestions");
     const newSuggestion: DbSuggestion = {
       ...trendProps,
       id: `suggestion-${uuid()}`,
@@ -179,31 +179,31 @@ class Db {
     return newSuggestion;
   }
   async createHashtagTrend(
-    trendProps: Pick<DbHashtagTrend, 'tweetCount' | 'hashtag'>
+    trendProps: Pick<DbHashtagTrend, "tweetCount" | "hashtag">
   ): Promise<DbHashtagTrend> {
-    const hashtagTrends = this.db.get('hashtagTrends');
+    const hashtagTrends = this.db.get("hashtagTrends");
     const newTrend: DbHashtagTrend = {
       ...trendProps,
-      kind: 'hashtag',
+      kind: "hashtag",
       id: `hashtrend-${uuid()}`,
     };
     await hashtagTrends.push(newTrend).write();
     return newTrend;
   }
   async createTopicTrend(
-    trendProps: Pick<DbTopicTrend, 'topic' | 'tweetCount'>,
-    quoteProps?: Pick<DbTopicTrendQuote, 'title' | 'imageUrl' | 'description'>
+    trendProps: Pick<DbTopicTrend, "topic" | "tweetCount">,
+    quoteProps?: Pick<DbTopicTrendQuote, "title" | "imageUrl" | "description">
   ): Promise<DbTopicTrend> {
-    const topicTrends = this.db.get('topicTrends');
+    const topicTrends = this.db.get("topicTrends");
     const newTrend: DbTopicTrend = {
       ...trendProps,
-      kind: 'topic',
+      kind: "topic",
       id: `topictrend-${uuid()}`,
     };
     await topicTrends.push(newTrend).write();
     if (quoteProps) {
       const { title, description, imageUrl } = quoteProps;
-      const topicTrendQuotes = this.db.get('topicTrendQuotes');
+      const topicTrendQuotes = this.db.get("topicTrendQuotes");
       const newQuote: DbTopicTrendQuote = {
         ...trendProps,
         title,
@@ -218,9 +218,9 @@ class Db {
   }
 
   async createTweet(
-    tweetProps: Pick<DbTweet, 'message' | 'userId'>
+    tweetProps: Pick<DbTweet, "message" | "userId">
   ): Promise<DbTweet> {
-    const tweets = this.db.get('tweets');
+    const tweets = this.db.get("tweets");
     const tweet: DbTweet = {
       ...tweetProps,
       createdAt: new Date().toISOString(),
@@ -232,9 +232,9 @@ class Db {
   }
 
   async createUser(
-    userProps: Pick<DbUser, 'name' | 'handle' | 'avatarUrl' | 'coverUrl'>
+    userProps: Pick<DbUser, "name" | "handle" | "avatarUrl" | "coverUrl">
   ): Promise<DbUser> {
-    const users = this.db.get('users');
+    const users = this.db.get("users");
     const user: DbUser = {
       ...userProps,
       createdAt: new Date().toISOString(),
@@ -246,13 +246,13 @@ class Db {
   }
 
   async createFavorite(
-    favoriteProps: Pick<DbFavorite, 'tweetId' | 'userId'>
+    favoriteProps: Pick<DbFavorite, "tweetId" | "userId">
   ): Promise<DbFavorite> {
     const user = this.getUserById(favoriteProps.userId);
     const tweet = this.getTweetById(favoriteProps.tweetId);
-    if (!user) throw new Error('User does not exist');
-    if (!tweet) throw new Error('Tweet does not exist');
-    const favorites = this.db.get('favorites');
+    if (!user) throw new Error("User does not exist");
+    if (!tweet) throw new Error("Tweet does not exist");
+    const favorites = this.db.get("favorites");
     const favorite: DbFavorite = {
       ...favoriteProps,
       createdAt: new Date().toISOString(),
@@ -263,13 +263,13 @@ class Db {
     return favorite;
   }
   async deleteFavorite(
-    favoriteProps: Pick<DbFavorite, 'tweetId' | 'userId'>
+    favoriteProps: Pick<DbFavorite, "tweetId" | "userId">
   ): Promise<DbFavorite> {
     const user = this.getUserById(favoriteProps.userId);
     const tweet = this.getTweetById(favoriteProps.tweetId);
-    if (!user) throw new Error('User does not exist');
-    if (!tweet) throw new Error('Tweet does not exist');
-    const favorites = this.db.get('favorites');
+    if (!user) throw new Error("User does not exist");
+    if (!tweet) throw new Error("Tweet does not exist");
+    const favorites = this.db.get("favorites");
 
     const deleted = favorites.remove(
       (f) => f.tweetId === tweet.id && f.userId === user.id
@@ -280,11 +280,11 @@ class Db {
   }
 
   hasUser(predicate: (user: DbUser) => boolean): boolean {
-    return !!this.db.get('users').find(predicate);
+    return !!this.db.get("users").find(predicate);
   }
 
   getAllUsers(): DbUser[] {
-    return this.db.get('users').value();
+    return this.db.get("users").value();
   }
 
   async write(): Promise<void> {
